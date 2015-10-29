@@ -4,6 +4,11 @@
     <ion-toggle  ng-model="settings.enableFriends">
         Enable Friends
     </ion-toggle>
+    <ion-item ng-repeat="state in states">
+      <ion-toggle  ng-model="settings[state]">
+          {{state}}
+      </ion-toggle>
+    </ion-item>
     </ion-list>
   </ion-content>
 </ion-view>
