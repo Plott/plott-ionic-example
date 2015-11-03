@@ -21,10 +21,12 @@ angular.module('starter.controllers', [])
   $scope.chat = Chats.get($stateParams.chatId);
 })
 
-.controller('MapCtrl', function($scope, $http, MAPBOX) {
+.controller('MapCtrl', function($scope, $http, MAPBOX, $cordovaGeolocation) {
   var vm = this;
 
   vm.coverageFeatures = [];
+
+
 
 
   L.mapbox.accessToken = MAPBOX.TOKEN;
@@ -34,7 +36,17 @@ angular.module('starter.controllers', [])
       autocomplete: true
     }));
 
-  // var heat = L.heatLayer([], { maxZoom: 12 }).addTo(map);
+    var posOptions = {timeout: 10000, enableHighAccuracy: true};
+    $cordovaGeolocation
+      .getCurrentPosition(posOptions)
+      .then(function (position) {
+        console.log(position);
+        var lat  = position.coords.latitude
+        var lng = position.coords.longitude
+        L.marker([lat, lng]).addTo(map);
+      }, function(err) {
+        // error
+      });
 
    $scope.coveragePromise = $http.get('http://localhost:9000/api/coverages')
     .then(function(coveragePoints) {
@@ -45,13 +57,11 @@ angular.module('starter.controllers', [])
           },
           onEachFeature: function (feature, layer) {
             console.log(feature);
-
-            heat.addLatLng(L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]), feature.properties.wifi[0].signal_level);
               layer.bindPopup(feature.properties.wifi[0].signal_level);
           }
       }).addTo(map);
 
-        $scope.coveragePoints.addData(item);
+
 
     }).
     catch(function(ex){
@@ -60,8 +70,7 @@ angular.module('starter.controllers', [])
 
   //On click get interment data
   map.on('click', function(e) {
-   console.log(e);
-   heat.addLatLng(e.latlng);
+  
         var data= {
             "type": "Feature",
             "properties": {
